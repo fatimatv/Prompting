@@ -7,3 +7,8 @@ coverage
 *.log
 tsconfig.tsbuildinfo
 prisma/dev.db
+
+# Local research/scraping workspaces outside this app
+anpd_arco_resoluciones/
+indecopi_scraping/
+sentencias_delitos_informaticos/

@@ -28,6 +28,7 @@ import {
   type LegalUse,
   type OutputType
 } from "@/lib/frameworks";
+import { LegalConsultationPanel } from "@/components/legal-consultation-panel";
 
 type WizardState = {
   need: string;
@@ -70,6 +71,7 @@ const navItems = [
   ["Explorar", "#explorar"],
   ["Recomendador", "#recomendador"],
   ["Optimizador", "#optimizador"],
+  ["Consulta", "#consulta"],
   ["Comparar", "#comparar"],
   ["Guía", "#guia"],
   ["Contacto", "#contacto"]
@@ -367,6 +369,8 @@ export default function Home() {
         copied={optimizerCopied}
         onCopy={copyOptimizedPrompt}
       />
+
+      <LegalConsultationPanel />
 
       <section id="comparar" className="scroll-mt-24 bg-[#0118BF] py-14 text-white">
         <DigitalPattern />

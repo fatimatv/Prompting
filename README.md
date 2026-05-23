@@ -19,6 +19,9 @@ Herramienta web educativa para aprender a construir mejores prompts de inteligen
 - Botón para copiar plantilla.
 - Recomendador básico basado en reglas.
 - Optimizador de prompts basado en patrones de la GPT-5.5 Prompting Guide: outcome-first, evidencia, formato, validación y stop rules.
+- Consulta legal asistida conectada a `/api/consultations`, con fallback seguro si no hay fuentes indexadas.
+- Panel de base normativa y estado de fuentes desde `/api/sources`.
+- Historial de consultas por sesión desde `/api/history`.
 - Comparador de hasta 3 frameworks.
 - Textos editables desde componentes y dataset.
 
@@ -28,17 +31,32 @@ Herramienta web educativa para aprender a construir mejores prompts de inteligen
 src/app/page.tsx          App principal e interacción
 src/app/globals.css       Variables visuales y estilos globales
 src/app/layout.tsx        Metadata
+src/components/legal-consultation-panel.tsx  Consulta legal, fuentes e historial
 src/lib/frameworks.ts     Dataset de frameworks legales
+src/lib/legal.ts          Esquemas, tipos y fallback de respuesta legal
+src/lib/openai.ts         Integración con OpenAI Responses API y file search
+src/lib/security.ts       Sesión anónima, cookies y rate limit básico
 ```
 
 ## Ejecución local
 
 ```bash
 npm install
+npm run prisma:generate
 npm run dev
 ```
 
 Abre `http://localhost:3000`.
+
+## Configuración de consultas legales
+
+1. Copia `.env.example` a `.env`.
+2. Configura `DATABASE_URL` con una base PostgreSQL disponible.
+3. Ejecuta `npm run prisma:migrate` para crear las tablas.
+4. Opcionalmente ejecuta `POST /api/sources/seed` para registrar las fuentes normativas planificadas.
+5. Configura `OPENAI_API_KEY` y `OPENAI_VECTOR_STORE_ID` para activar respuestas con file search.
+
+Si `OPENAI_API_KEY` u `OPENAI_VECTOR_STORE_ID` están vacíos, la app no inventa fundamentos: devuelve una respuesta de fallback indicando que faltan fuentes documentales.
 
 ## Verificación de producción
 
