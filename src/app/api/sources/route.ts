@@ -1,41 +1,16 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { plannedNormativeSources } from "@/lib/legal";
 
+const sources = plannedNormativeSources.map((title) => ({
+  id: title.toLowerCase().replaceAll(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
+  title,
+  category: "Base normativa de referencia",
+  jurisdiction: "Peru",
+  status: "PLANNED" as const,
+  sourceUrl: null,
+  vectorStoreId: null
+}));
+
 export async function GET() {
-  try {
-    const sources = await prisma.sourceDocument.findMany({
-      orderBy: [{ status: "asc" }, { title: "asc" }]
-    });
-
-    if (sources.length > 0) {
-      return NextResponse.json({ sources, persisted: true });
-    }
-  } catch {
-    return NextResponse.json({
-      sources: plannedNormativeSources.map((title) => ({
-        id: title,
-        title,
-        category: "Base normativa planificada",
-        jurisdiction: "Peru",
-        status: "PLANNED",
-        sourceUrl: null,
-        vectorStoreId: null
-      })),
-      persisted: false
-    });
-  }
-
-  return NextResponse.json({
-    sources: plannedNormativeSources.map((title) => ({
-      id: title,
-      title,
-      category: "Base normativa planificada",
-      jurisdiction: "Peru",
-      status: "PLANNED",
-      sourceUrl: null,
-      vectorStoreId: null
-    })),
-    persisted: true
-  });
+  return NextResponse.json({ sources, persisted: false });
 }

@@ -14,3 +14,7 @@ indecopi_scraping/
 sentencias_delitos_informaticos/
 
 .vercel
+
+# Claude Code local metadata
+CLAUDE.md
+.claude/

@@ -29,6 +29,8 @@ import {
   type OutputType
 } from "@/lib/frameworks";
 import { LegalConsultationPanel } from "@/components/legal-consultation-panel";
+import { ProductsCatalog } from "@/components/products-catalog";
+import { PromptBuilder } from "@/components/prompt-builder";
 
 type WizardState = {
   need: string;
@@ -68,11 +70,12 @@ const initialOptimizer: PromptOptimizerState = {
 };
 
 const navItems = [
-  ["Explorar", "#explorar"],
+  ["Catálogo", "#products-catalog"],
+  ["Constructor", "#prompt-builder"],
+  ["Frameworks", "#explorar"],
   ["Recomendador", "#recomendador"],
   ["Optimizador", "#optimizador"],
   ["Consulta", "#consulta"],
-  ["Comparar", "#comparar"],
   ["Guía", "#guia"],
   ["Contacto", "#contacto"]
 ];
@@ -231,6 +234,10 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <ProductsCatalog />
+
+      <PromptBuilder />
 
       <section id="explorar" className="scroll-mt-24 bg-[#F8FAFF] py-14">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -1099,32 +1106,67 @@ function DetailBlock({ title, body }: { title: string; body: string }) {
 
 function Footer() {
   return (
-    <footer id="contacto" className="scroll-mt-24 border-t border-[#D4D5D5] bg-[#0B1220] py-10 text-white">
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 md:grid-cols-[1fr_1.2fr] lg:px-8">
-        <div className="flex items-start gap-3">
-          <LogoMark />
-          <div>
-            <h2 className="text-xl font-black">IALAW</h2>
-            <p className="mt-2 text-sm leading-6 text-white/70">
-              IALAW Digital Lawyers · Derecho, tecnología e inteligencia artificial.
-            </p>
-          </div>
-        </div>
-        <div className="grid gap-6 sm:grid-cols-2">
-          <div>
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-[#FBBB02]">Links</p>
-            <div className="mt-3 flex flex-wrap gap-3 text-sm font-bold text-white/76">
-              <a href="#guia" className="hover:text-white">Guía de prompting</a>
-              <a href="#explorar" className="hover:text-white">Protección de datos</a>
-              <a href="#explorar" className="hover:text-white">IA y Derecho</a>
-              <a href="#contacto" className="hover:text-white">Contacto</a>
+    <footer
+      id="contacto"
+      className="scroll-mt-24 border-t border-[#D4D5D5] bg-[#0B1220] py-12 text-white"
+    >
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid gap-10 md:grid-cols-[1.2fr_1fr]">
+          <section>
+            <div className="flex items-start gap-3">
+              <LogoMark />
+              <div>
+                <h2 className="text-xl font-black">IALAW Digital Lawyers</h2>
+                <p className="mt-2 text-sm leading-6 text-white/70">
+                  Derecho, tecnología e inteligencia artificial al servicio de operadores jurídicos
+                  en Latinoamérica.
+                </p>
+              </div>
             </div>
-          </div>
-          <div>
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-[#FBBB02]">Contacto</p>
-            <p className="mt-3 text-sm text-white/76">contacto@ialaw.com</p>
-            <p className="mt-1 text-sm text-white/76">www.ialaw.com</p>
-          </div>
+            <div className="mt-5">
+              <a
+                href="https://iriartelaw.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm font-bold text-[#FBBB02] transition hover:text-white"
+              >
+                iriartelaw.com →
+              </a>
+            </div>
+          </section>
+
+          <section>
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-[#FBBB02]">
+              Navegar
+            </p>
+            <div className="mt-3 grid grid-cols-2 gap-2 text-sm font-semibold text-white/80">
+              <a href="#products-catalog" className="hover:text-white">
+                Catálogo
+              </a>
+              <a href="#prompt-builder" className="hover:text-white">
+                Constructor
+              </a>
+              <a href="#explorar" className="hover:text-white">
+                Frameworks
+              </a>
+              <a href="#optimizador" className="hover:text-white">
+                Optimizador
+              </a>
+              <a href="#consulta" className="hover:text-white">
+                Consulta
+              </a>
+              <a href="#guia" className="hover:text-white">
+                Guía
+              </a>
+            </div>
+          </section>
+        </div>
+
+        <div className="mt-10 flex flex-col items-start justify-between gap-3 border-t border-white/15 pt-6 text-xs text-white/60 sm:flex-row sm:items-center">
+          <p>© {new Date().getFullYear()} IALAW Digital Lawyers.</p>
+          <p>
+            Esta herramienta es educativa y no sustituye la asesoría legal profesional.
+          </p>
         </div>
       </div>
     </footer>
