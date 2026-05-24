@@ -19,15 +19,18 @@ import {
   X
 } from "lucide-react";
 import {
+  branchFrameworks,
   frameworks,
   legalUses,
   levels,
   outputTypes,
+  ramasJuridicas,
   type Framework,
   type FrameworkLevel,
   type LegalUse,
   type OutputType
 } from "@/lib/frameworks";
+import { legalProducts } from "@/lib/legal-products";
 import { LegalConsultationPanel } from "@/components/legal-consultation-panel";
 import { ProductsCatalog } from "@/components/products-catalog";
 import { PromptBuilder } from "@/components/prompt-builder";
@@ -48,6 +51,7 @@ type PromptOptimizerState = {
   evidence: string;
   tone: string;
   verbosity: string;
+  reasoning: string;
 };
 
 const initialWizard: WizardState = {
@@ -66,7 +70,8 @@ const initialOptimizer: PromptOptimizerState = {
   output: "Informe breve",
   evidence: "usar fuentes proporcionadas o pedirlas si faltan",
   tone: "experto, claro y práctico",
-  verbosity: "medio"
+  verbosity: "medio",
+  reasoning: "medium"
 };
 
 const navItems = [
@@ -554,7 +559,9 @@ function DigitalPattern() {
 }
 
 function HeroDashboard() {
-  const chips = ["Contratos", "Datos personales", "IA jurídica", "Compliance", "Ciberseguridad"];
+  const ramaCount = ramasJuridicas.length;
+  const productCount = legalProducts.length;
+  const frameworkCount = frameworks.length + branchFrameworks.length;
 
   return (
     <div className="relative flex items-center justify-center">
@@ -562,45 +569,16 @@ function HeroDashboard() {
         <div className="mb-5 flex items-center justify-between gap-3">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.18em] text-[#011EF4]">Prompt Lab Legal IA</p>
-            <h2 className="mt-1 text-2xl font-black">Panel de estructura</h2>
+            <h2 className="mt-1 text-2xl font-black">Construye tu prompt en 4 pasos</h2>
           </div>
           <div className="rounded-lg bg-[#FBBB02] px-3 py-2 text-xs font-black">Beta educativo</div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="rounded-xl border border-[#D4D5D5] bg-[#F8FAFF] p-4">
-            <Layers3 className="mb-3 h-5 w-5 text-[#011EF4]" />
-            <p className="text-sm font-black">Framework sugerido</p>
-            <p className="mt-2 text-3xl font-black text-[#011EF4]">CLAUSE</p>
-            <p className="mt-1 text-xs leading-5 text-[#6F7072]">Para redacción contractual con alcance y estilo.</p>
-          </div>
-          <div className="rounded-xl border border-[#D4D5D5] bg-[#F8FAFF] p-4">
-            <FileSearch className="mb-3 h-5 w-5 text-[#011EF4]" />
-            <p className="text-sm font-black">Salida esperada</p>
-            <p className="mt-2 text-3xl font-black text-[#011EF4]">Matriz</p>
-            <p className="mt-1 text-xs leading-5 text-[#6F7072]">Riesgos, controles y evidencia revisable.</p>
-          </div>
-        </div>
-
-        <div className="mt-5 rounded-xl border border-[#D4D5D5] p-4">
-          <div className="mb-3 flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-[#FBBB02]" />
-            <p className="text-sm font-black">Áreas frecuentes</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {chips.map((chip) => (
-              <span key={chip} className="rounded-full border border-[#D4D5D5] bg-white px-3 py-1 text-xs font-bold">
-                {chip}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-5 grid grid-cols-3 gap-3 text-center">
+        <div className="grid grid-cols-3 gap-3 text-center">
           {[
-            ["19", "frameworks"],
-            ["3", "comparables"],
-            ["5", "preguntas"]
+            [String(ramaCount), "ramas"],
+            [String(productCount), "productos"],
+            [String(frameworkCount), "frameworks"]
           ].map(([value, label]) => (
             <div key={label} className="rounded-xl bg-[#011EF4] p-3 text-white">
               <div className="text-2xl font-black">{value}</div>
@@ -608,25 +586,65 @@ function HeroDashboard() {
             </div>
           ))}
         </div>
+
+        <div className="mt-5 rounded-xl border border-[#D4D5D5] p-4">
+          <div className="mb-3 flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-[#FBBB02]" />
+            <p className="text-sm font-black">Ramas cubiertas</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {ramasJuridicas.map((rama) => (
+              <a
+                key={rama}
+                href="#products-catalog"
+                className="rounded-full border border-[#D4D5D5] bg-white px-3 py-1 text-xs font-bold text-[#0B1220] transition hover:border-[#011EF4] hover:text-[#011EF4]"
+              >
+                {rama}
+              </a>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-5 grid grid-cols-2 gap-3">
+          <a
+            href="#products-catalog"
+            className="flex items-center justify-center gap-2 rounded-xl border-2 border-[#011EF4] bg-white p-3 text-center text-sm font-black text-[#011EF4] transition hover:bg-[#011EF4] hover:text-white"
+          >
+            <FileSearch className="h-4 w-4" />
+            Ver catálogo
+          </a>
+          <a
+            href="#prompt-builder"
+            className="flex items-center justify-center gap-2 rounded-xl bg-[#FBBB02] p-3 text-center text-sm font-black text-[#0B1220] transition hover:bg-[#ffd046]"
+          >
+            <Layers3 className="h-4 w-4" />
+            Constructor →
+          </a>
+        </div>
       </div>
     </div>
   );
 }
 
 function MobileHeroPanel() {
-  const chips = ["Contratos", "Datos personales", "Compliance", "Ciberseguridad"];
-
+  const frameworkCount = frameworks.length + branchFrameworks.length;
   return (
     <div className="mt-5 rounded-xl border border-white/20 bg-white/10 p-3 lg:hidden">
       <div className="flex items-center justify-between gap-3">
         <p className="text-xs font-black uppercase tracking-[0.18em] text-[#FBBB02]">Panel legal IA</p>
-        <span className="rounded-full bg-white px-2.5 py-1 text-xs font-black text-[#011EF4]">19 frameworks</span>
+        <span className="rounded-full bg-white px-2.5 py-1 text-xs font-black text-[#011EF4]">
+          {ramasJuridicas.length} ramas · {frameworkCount} frameworks
+        </span>
       </div>
       <div className="mt-2 flex flex-wrap gap-2">
-        {chips.map((chip) => (
-          <span key={chip} className="rounded-full border border-white/25 bg-white/10 px-2.5 py-1 text-xs font-bold">
-            {chip}
-          </span>
+        {ramasJuridicas.map((rama) => (
+          <a
+            key={rama}
+            href="#products-catalog"
+            className="rounded-full border border-white/25 bg-white/10 px-2.5 py-1 text-xs font-bold transition hover:bg-white/20"
+          >
+            {rama}
+          </a>
         ))}
       </div>
     </div>
@@ -915,6 +933,12 @@ function PromptOptimizer({
                 value={optimizer.verbosity}
                 options={["bajo", "medio", "alto"]}
                 onChange={(value) => setOptimizer({ ...optimizer, verbosity: value })}
+              />
+              <SelectField
+                label="Profundidad de razonamiento"
+                value={optimizer.reasoning}
+                options={["low", "medium", "high"]}
+                onChange={(value) => setOptimizer({ ...optimizer, reasoning: value })}
               />
             </div>
 
@@ -1228,15 +1252,26 @@ Transforma el siguiente encargo en una respuesta jurídica útil y revisable:
 # Evidence and retrieval budget
 - ${optimizer.evidence}.
 - Usa el mínimo de evidencia suficiente para responder correctamente.
-- Cita fuentes concretas cuando se usen datos normativos, fechas, obligaciones o criterios específicos.
 - No realices búsquedas adicionales para mejorar estilo, ampliar ejemplos no esenciales o sostener afirmaciones que pueden formularse como supuestos.
 - Si no hay soporte suficiente, marca la respuesta como preliminar y lista la evidencia faltante.
+
+# Verification
+- Antes de cualquier afirmación sobre norma, jurisprudencia, plazo o sanción, verifica que el dato provenga de una fuente disponible o de los hechos aportados; si no, márcala como supuesto y solicita verificación humana.
+- Antes de cerrar la respuesta, revisa internamente que cada conclusión esté respaldada por un fundamento explícito (norma o hecho citado).
+- Si la respuesta puede ejecutarse o enviarse a un tercero (acto administrativo, comunicación, escrito procesal), exige confirmación humana antes de tratarla como definitiva.
+
+# Citation
+- Cita norma, artículo y fecha de verificación entre paréntesis en cada afirmación normativa, ej.: (Ley 29733, art. 5; verificado [FECHA]).
+- Para jurisprudencia: tribunal, número de expediente, fecha de la decisión y, si es posible, pinpoint a párrafo.
+- Distingue cita literal (entre comillas) de paráfrasis.
+- Si la fuente no se puede verificar en el contexto disponible, no la cites: declárala como pendiente de verificación.
 
 # Constraints
 - No inventes normas, artículos, precedentes, sanciones, métricas ni capacidades técnicas.
 - No sustituyas la revisión de un abogado responsable.
 - No incluyas información confidencial en herramientas externas sin autorización y controles adecuados.
 - Mantén text.verbosity: ${optimizer.verbosity}.
+- Aplica reasoning_effort: ${optimizer.reasoning}.
 
 # Output
 Entrega en esta estructura:
