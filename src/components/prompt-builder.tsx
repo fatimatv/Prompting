@@ -522,7 +522,7 @@ export function PromptBuilder() {
             className="mt-2 text-3xl font-black tracking-normal sm:text-4xl"
             style={{ color: NAVY }}
           >
-            Wizard de 4 pasos · sin llamadas a IA
+            Wizard de 4 pasos
           </h2>
           <p className="mt-3 text-sm leading-6 text-[#4B5563]">
             Construye un prompt estructurado y cópialo en la IA de tu elección. Toda la lógica corre
