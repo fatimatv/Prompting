@@ -68,7 +68,7 @@ const initialOptimizer: PromptOptimizerState = {
   audience: "equipo legal interno",
   legalArea: "Protección de datos",
   output: "Informe breve",
-  evidence: "usar fuentes proporcionadas o pedirlas si faltan",
+  evidence: "usar solo fuentes proporcionadas o pedirlas si faltan",
   tone: "experto, claro y práctico",
   verbosity: "medio",
   reasoning: "medium"
@@ -115,7 +115,7 @@ const faqs = [
   },
   {
     question: "¿Cómo evito respuestas inventadas?",
-    answer: "Pide que se distingan hechos, supuestos y fuentes; exige citas verificables; y solicita que la IA declare incertidumbres."
+    answer: "Pide que se distingan hechos, supuestos y fuentes; exige citas verificables; solicita incertidumbres y ordena no citar autoridades que no pueda verificar."
   },
   {
     question: "¿Qué framework debo usar para contratos?",
@@ -858,8 +858,8 @@ function PromptOptimizer({
               Convierte un prompt legal amplio en una instrucción outcome-first
             </h2>
             <p className="mt-3 text-[#4B5563]">
-              Basado en la guía GPT-5.5: objetivos primero, controles de estilo concisos, presupuesto de evidencia,
-              reglas de validación y condiciones claras para detenerse.
+              Basado en la guía GPT-5.5: resultado primero, controles de estilo concisos, presupuesto de evidencia,
+              reglas de validación y stop rules jurídicas. No llama a ninguna API.
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
@@ -915,10 +915,10 @@ function PromptOptimizer({
                 label="Evidencia"
                 value={optimizer.evidence}
                 options={[
-                  "usar fuentes proporcionadas o pedirlas si faltan",
+                  "usar solo fuentes proporcionadas o pedirlas si faltan",
                   "usar solo el documento base",
-                  "citar norma y fuente cuando sea posible",
-                  "trabajar con supuestos señalados"
+                  "citar norma y fuente solo si son verificables",
+                  "trabajar con supuestos señalados y pendientes de verificación"
                 ]}
                 onChange={(value) => setOptimizer({ ...optimizer, evidence: value })}
               />
@@ -1206,7 +1206,7 @@ function diagnosePrompt(prompt: string) {
   const checks = [
     {
       label: "Define un resultado esperado, no solo una tarea abierta.",
-      ok: /resultado|objetivo|entrega|salida|quiero|necesito|prepara|redacta|analiza/.test(normalized)
+      ok: /resultado|objetivo|entrega|salida|criterio|quiero|necesito|prepara|redacta|analiza|determina/.test(normalized)
     },
     {
       label: "Incluye contexto jurídico suficiente: área, hechos, documento o jurisdicción.",
@@ -1223,6 +1223,10 @@ function diagnosePrompt(prompt: string) {
     {
       label: "Incluye una regla de validación o revisión humana antes del uso profesional.",
       ok: /valid|revis|verifica|contrasta|humana|advert/.test(normalized)
+    },
+    {
+      label: "Exige vigencia, jurisdicción y trazabilidad de citas legales.",
+      ok: /vigencia|jurisdicci[oó]n|pa[ií]s|fecha|art[ií]culo|expediente|autoridad|trazabilidad/.test(normalized)
     }
   ];
   const score = Math.round((checks.filter((check) => check.ok).length / checks.length) * 100);
@@ -1233,36 +1237,41 @@ function diagnosePrompt(prompt: string) {
 function buildOptimizedPrompt(optimizer: PromptOptimizerState) {
   const original = optimizer.prompt.trim() || "[Describe aquí el encargo legal original]";
 
-  return `Role: Asistente jurídico especializado en ${optimizer.legalArea}, orientado a apoyar a ${optimizer.audience}.
+  return `# Role
+Asistente jurídico especializado en ${optimizer.legalArea}, orientado a apoyar a ${optimizer.audience}.
 
 # Personality
-Responde con tono ${optimizer.tone}. Sé preciso, práctico y transparente sobre límites, supuestos e incertidumbre. No uses lenguaje promocional ni afirmes certeza si falta evidencia.
+Responde con tono ${optimizer.tone}. Sé preciso, práctico y transparente sobre límites, supuestos e incertidumbre. Evita lenguaje promocional, conclusiones absolutas y explicaciones procesales innecesarias.
 
 # Goal
-Transforma el siguiente encargo en una respuesta jurídica útil y revisable:
+Entrega una respuesta jurídica útil, verificable y lista para revisión profesional a partir del siguiente encargo:
 """${original}"""
 
 # Success criteria
-- La respuesta cumple el objetivo principal sin añadir pasos innecesarios.
-- Se distinguen hechos, supuestos, análisis y recomendación.
+- La respuesta atiende el objetivo principal sin ampliar innecesariamente el alcance.
+- Se distinguen hechos aportados, supuestos, fuentes verificadas, análisis, incertidumbres y recomendación.
 - La salida está pensada para ${optimizer.audience}.
 - El resultado final se entrega como: ${optimizer.output}.
-- Si falta una norma, contrato, sentencia, fecha, jurisdicción o documento base material, pide el dato mínimo necesario antes de concluir.
+- Si falta jurisdicción, fecha de vigencia, norma, contrato, sentencia, autoridad, documento base o hecho material, pide el dato mínimo necesario antes de concluir.
+- Cada conclusión jurídica se apoya en un hecho identificado, una fuente verificable o un supuesto marcado.
 
 # Evidence and retrieval budget
 - ${optimizer.evidence}.
 - Usa el mínimo de evidencia suficiente para responder correctamente.
-- No realices búsquedas adicionales para mejorar estilo, ampliar ejemplos no esenciales o sostener afirmaciones que pueden formularse como supuestos.
-- Si no hay soporte suficiente, marca la respuesta como preliminar y lista la evidencia faltante.
+- Prioriza fuentes primarias: norma oficial vigente, expediente, contrato, sentencia, resolución administrativa o documento base proporcionado.
+- No uses búsquedas adicionales para mejorar estilo, ampliar ejemplos no esenciales o sostener afirmaciones que deben tratarse como supuestos.
+- Si no hay soporte suficiente, marca la respuesta como preliminar, lista la evidencia faltante y evita cerrar una recomendación definitiva.
 
 # Verification
-- Antes de cualquier afirmación sobre norma, jurisprudencia, plazo o sanción, verifica que el dato provenga de una fuente disponible o de los hechos aportados; si no, márcala como supuesto y solicita verificación humana.
-- Antes de cerrar la respuesta, revisa internamente que cada conclusión esté respaldada por un fundamento explícito (norma o hecho citado).
+- Antes de cualquier afirmación sobre norma, jurisprudencia, autoridad, plazo, sanción, competencia o procedimiento, verifica que el dato provenga de una fuente disponible o de los hechos aportados; si no, márcalo como pendiente.
+- No mezcles jurisdicciones ni importes reglas extranjeras sin advertirlo.
+- Antes de cerrar la respuesta, revisa internamente que cada conclusión esté respaldada por un fundamento explícito: fuente, hecho o supuesto.
 - Si la respuesta puede ejecutarse o enviarse a un tercero (acto administrativo, comunicación, escrito procesal), exige confirmación humana antes de tratarla como definitiva.
 
 # Citation
 - Cita norma, artículo y fecha de verificación entre paréntesis en cada afirmación normativa, ej.: (Ley 29733, art. 5; verificado [FECHA]).
-- Para jurisprudencia: tribunal, número de expediente, fecha de la decisión y, si es posible, pinpoint a párrafo.
+- Para jurisprudencia: tribunal, número de expediente, fecha de la decisión y, si es posible, pinpoint a párrafo o fundamento.
+- Para criterios administrativos: autoridad, resolución/directiva, fecha, identificador y enlace o referencia oficial si está disponible.
 - Distingue cita literal (entre comillas) de paráfrasis.
 - Si la fuente no se puede verificar en el contexto disponible, no la cites: declárala como pendiente de verificación.
 

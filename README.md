@@ -26,12 +26,12 @@ No hay `@prisma/client`, `openai`, `@anthropic-ai/sdk`, ni ningún SDK que requi
 | Hero + navegación | Landing con acceso a cada sección. |
 | Catálogo de productos jurídicos | 32 productos en 8 ramas, filtrables por rama y búsqueda libre. Click → panel lateral con consejos, errores frecuentes y frameworks recomendados. |
 | Constructor de prompts | Wizard de 4 pasos (Contexto → Framework → Variables → Prompt) con preselección desde el catálogo. |
-| Analizador de calidad | Evalúa el prompt generado contra 4 criterios (rol, jurisdicción, formato, restricciones). Sin API. |
+| Analizador de calidad | Evalúa el prompt generado contra 7 criterios (resultado, rol, jurisdicción, formato, restricciones, evidencia y verificación). Sin API. |
 | Historial local | Hasta 10 prompts en `localStorage` con fecha, rama, producto, framework, IA destino y texto completo. Copiar / descargar / eliminar. |
 | Guía rápida por IA | Modal con consejos específicos para ChatGPT, Claude, Gemini, Copilot u "Otro". |
 | Frameworks generales | Galería de 19 frameworks (RTF, CTF, RACE, IRAC, CREAC, RISK, CLAUSE, AUDIT, etc.) con búsqueda, filtros y modal de detalle. |
 | Recomendador | Sugiere framework según 5 preguntas (regla, no IA). |
-| Optimizador GPT-5.5 | Convierte prompt amplio en uno outcome-first; diagnóstico local sobre 5 criterios. |
+| Optimizador GPT-5.5 | Convierte prompt amplio en uno outcome-first; diagnóstico local sobre 6 criterios, presupuesto de evidencia y stop rules jurídicas. |
 | Comparador | Hasta 3 frameworks lado a lado. |
 | Guía y FAQ | Bloque educativo y preguntas frecuentes. |
 
@@ -122,6 +122,18 @@ Build esperado: 7 rutas (1 página + 1 not-found + 3 endpoints API + 2 estático
 - **Añadir un producto jurídico**: edita `legalProducts` en `src/lib/legal-products.ts`. Referencia frameworks por su `id`.
 - **Añadir consejos por IA**: edita `aiGuides` en `src/components/prompt-builder.tsx`.
 - **Cambiar criterios del analizador de calidad**: edita la función `analyzeQuality` en `src/components/prompt-builder.tsx`.
+
+## Criterios de prompting jurídico
+
+Las plantillas siguen la guía GPT-5.5 de OpenAI: prompts más orientados al resultado, con criterios de éxito, formato de salida, controles de estilo breves, presupuesto de evidencia, reglas de validación y condiciones para detenerse o pedir datos.
+
+Para uso jurídico, cada prompt debe reforzar además:
+
+- jurisdicción, fecha de vigencia y documento base;
+- separación entre hechos aportados, supuestos, fuentes verificadas, análisis e incertidumbres;
+- prohibición de inventar normas, artículos, jurisprudencia, sanciones, plazos o autoridades;
+- citación verificable de normas, expedientes, resoluciones o criterios administrativos;
+- revisión humana obligatoria antes de presentar, enviar o ejecutar el resultado.
 
 ## Diseño
 

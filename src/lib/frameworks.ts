@@ -42,7 +42,7 @@ export type Framework = {
 };
 
 const template = (title: string, components: string[]) =>
-  `${title}\n\n${components.map((item) => `- ${item}: [completa este campo]`).join("\n")}\n\nRestricciones: no inventes fuentes, identifica supuestos y separa hechos, normas y recomendación.`;
+  `${title}\n\nResultado esperado: [define la salida jurídica concreta y el estándar de éxito]\nJurisdicción y vigencia: [país / norma / fecha de verificación]\nFuentes disponibles: [normas, contratos, sentencias, resoluciones o documentos base]\n\n${components.map((item) => `- ${item}: [completa este campo]`).join("\n")}\n\nFormato de salida: [informe / matriz / checklist / cláusula / memo]\n\nRestricciones:\n- No inventes fuentes, artículos, jurisprudencia, sanciones ni plazos.\n- Identifica hechos, supuestos, normas verificadas, incertidumbres y recomendación.\n- Si falta una fuente o dato material, pregunta lo mínimo necesario antes de concluir.\n- Cita solo autoridades verificables; lo no verificado debe quedar como pendiente.\n- La salida requiere revisión de un abogado responsable antes de uso profesional.`;
 
 export const levels: FrameworkLevel[] = ["Básico", "Intermedio", "Avanzado"];
 

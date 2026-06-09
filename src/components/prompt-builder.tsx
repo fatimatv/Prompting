@@ -25,11 +25,15 @@ export type PromptBuilderPreset = {
   ia?: TargetAI;
 };
 
-const safetyBlock = `# Salvaguardas
-- No inventes normas, artículos, jurisprudencia, sanciones ni precedentes.
-- Si falta un dato relevante, pídelo antes de concluir.
-- Distingue hechos, supuestos, análisis y recomendación.
-- Esta salida es un borrador asistido por IA: requiere revisión por un abogado responsable antes de cualquier uso profesional.`;
+const safetyBlock = `# Salvaguardas jurídicas
+- No inventes normas, artículos, jurisprudencia, sanciones, plazos, criterios administrativos ni precedentes.
+- No mezcles jurisdicciones ni importes reglas extranjeras sin advertirlo expresamente.
+- Si falta jurisdicción, fecha de vigencia, documento base, fuente oficial o hecho material, pide el dato mínimo antes de concluir.
+- Distingue hechos aportados, supuestos, normas verificadas, análisis, incertidumbres y recomendación.
+- Cita solo fuentes que estén en el contexto o que puedas verificar; si una autoridad queda pendiente, márcala como "pendiente de verificación".
+- Para citas legales, incluye norma/autoridad, artículo o identificador, fecha y, si aplica, enlace o referencia oficial.
+- Antes de cerrar, revisa que cada conclusión tenga soporte en un hecho o fuente identificada.
+- Esta salida es un borrador asistido por IA: requiere revisión por un abogado responsable antes de cualquier uso profesional, presentación ante autoridad o comunicación a terceros.`;
 
 // ─────────────────────────────────────────────────────────────
 // Historial en localStorage
@@ -84,7 +88,7 @@ function persistHistory(entries: HistoryEntry[]) {
 // ─────────────────────────────────────────────────────────────
 
 type Criterion = {
-  key: "rol" | "jurisdiccion" | "formato" | "restricciones";
+  key: "resultado" | "rol" | "jurisdiccion" | "formato" | "restricciones" | "evidencia" | "verificacion";
   label: string;
   ok: boolean;
   sugerencia: string;
@@ -92,6 +96,11 @@ type Criterion = {
 
 function analyzeQuality(prompt: string): { score: number; criteria: Criterion[] } {
   const text = prompt.toLowerCase();
+
+  const hasOutcome =
+    /(objetivo|resultado esperado|success criteria|criterios de [eé]xito|entrega|prepara|redacta|analiza|eval[uú]a|determina|conclusi[oó]n breve)/.test(
+      text
+    );
 
   const hasRole =
     /(\brol\s*:|act[uú]a como|eres un[ao]?|asistente jur[ií]dico|abogad[oa]|counsel|fiscal|defensor[ao]?)\b/.test(
@@ -113,7 +122,24 @@ function analyzeQuality(prompt: string): { score: number; criteria: Criterion[] 
       text
     );
 
+  const hasEvidence =
+    /(fuente|evidencia|documento base|cita|jurisprudencia|norma|art[ií]culo|autoridad|expediente|fecha de verificaci[oó]n|pendiente de verificaci[oó]n)/.test(
+      text
+    );
+
+  const hasVerification =
+    /(verifica|contrasta|revisi[oó]n humana|abogado responsable|antes de cerrar|soporte|no la cites|pendiente de verificaci[oó]n|si falta)/.test(
+      text
+    );
+
   const criteria: Criterion[] = [
+    {
+      key: "resultado",
+      label: "Define resultado y criterio de éxito",
+      ok: hasOutcome,
+      sugerencia:
+        "Formula el encargo como resultado revisable: 'Entrega una matriz de riesgos con conclusión, supuestos, fuentes y próximos pasos'."
+    },
     {
       key: "rol",
       label: "Contexto del rol del abogado",
@@ -141,6 +167,20 @@ function analyzeQuality(prompt: string): { score: number; criteria: Criterion[] 
       ok: hasRestrictions,
       sugerencia:
         "Añade límites explícitos: 'no inventes normas ni jurisprudencia', 'declara supuestos', 'no sustituyas revisión profesional'."
+    },
+    {
+      key: "evidencia",
+      label: "Reglas de evidencia y citación",
+      ok: hasEvidence,
+      sugerencia:
+        "Indica qué fuentes usar y cómo citarlas: norma, artículo, autoridad, fecha de verificación y referencia oficial cuando aplique."
+    },
+    {
+      key: "verificacion",
+      label: "Verificación jurídica antes de concluir",
+      ok: hasVerification,
+      sugerencia:
+        "Pide una revisión final: cada conclusión debe estar respaldada por hechos o fuentes; lo no verificado debe quedar como pendiente."
     }
   ];
 
@@ -155,11 +195,11 @@ const aiGuides: Record<TargetAI, { titulo: string; consejos: string[] }> = {
   ChatGPT: {
     titulo: "Consejos para ChatGPT",
     consejos: [
-      "Sé muy explícito con el rol al inicio: 'Actúa como abogado especializado en [materia]'.",
-      "Usa secciones con # o ## (markdown) — ChatGPT respeta el formato y mejora la lectura.",
-      "Para análisis largo, pide 'razona paso a paso antes de concluir'.",
-      "Si quieres comparativa, solicita explícitamente una tabla con columnas nombradas.",
-      "Con GPT-4o+ puedes adjuntar PDFs: aprovéchalo cuando la fuente normativa es crítica."
+      "Empieza por el resultado esperado y el estándar de éxito; después agrega contexto, fuentes disponibles y formato.",
+      "Usa secciones con # o ## para separar hechos, tarea, evidencia, salida y stop rules.",
+      "Pide síntesis jurídica disciplinada: conclusiones precisas, incertidumbre ligada al dato faltante y nada de relleno.",
+      "Para análisis complejo, usa reasoning medium/high solo si hay ambigüedad, documentos largos o conflicto de fuentes.",
+      "Si adjuntas PDFs o fuentes, exige que cite página, artículo, párrafo o identificador verificable."
     ]
   },
   Claude: {
@@ -195,10 +235,10 @@ const aiGuides: Record<TargetAI, { titulo: string; consejos: string[] }> = {
   Otro: {
     titulo: "Consejos generales para cualquier IA",
     consejos: [
-      "Empieza con rol explícito y jurisdicción aplicable.",
-      "Estructura el prompt con secciones: contexto, tarea, formato, restricciones.",
-      "Pide formato concreto: informe, matriz, checklist, cláusula.",
-      "Incluye stop rules: 'no inventes', 'declara supuestos', 'pide datos faltantes'.",
+      "Empieza con resultado, jurisdicción, audiencia y documento o fuente disponible.",
+      "Estructura el prompt con secciones: contexto, tarea, evidencia, formato, restricciones y validación.",
+      "Pide formato concreto: informe, matriz, checklist, cláusula o memo ejecutivo.",
+      "Incluye stop rules: no inventar fuentes, declarar supuestos, pedir datos faltantes y separar normas verificadas de hipótesis.",
       "Cierra con una validación humana obligatoria antes de uso profesional."
     ]
   }
@@ -233,8 +273,17 @@ function assemblePrompt(args: {
 # Rama: ${framework.rama} | Nivel: ${framework.nivel}
 # Destinado a pegarse en: ${ia}
 
-## Instrucción
+## Resultado esperado
+Produce un borrador jurídico útil, verificable y listo para revisión profesional sobre: ${framework.producto}.
+
+## Contexto e instrucción
 ${filled}
+
+## Criterios de éxito
+- Responde la cuestión central sin ampliar innecesariamente el alcance.
+- Ajusta el análisis a la jurisdicción, norma, fecha y documento base aportados.
+- Si falta información crítica, pregunta lo mínimo necesario o entrega una versión preliminar claramente marcada.
+- Vincula cada conclusión con un hecho, fuente o supuesto identificado.
 
 ## Estructura esperada
 ${framework.estructura.map((item, idx) => `${idx + 1}. ${item}`).join("\n")}
@@ -1003,7 +1052,7 @@ function QualityAnalyzer({
             Analizador de calidad del prompt
           </h3>
           <p className="mt-1 text-xs text-[#6F7072]">
-            Evaluación local sobre 4 criterios. Sin llamadas a IA.
+            Evaluación local sobre 7 criterios. Sin llamadas a IA.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -1011,7 +1060,7 @@ function QualityAnalyzer({
             className="flex h-12 w-12 items-center justify-center rounded-full text-lg font-black text-white"
             style={{ backgroundColor: scoreColor }}
           >
-            {quality.score}/4
+            {quality.score}/7
           </span>
           <button
             type="button"
